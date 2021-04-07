@@ -1,0 +1,23 @@
+﻿<Window x:Class="ColorsInImage.WPF.GetName"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ColorsInImage.WPF"
+        mc:Ignorable="d"
+        Title="Set Title" FontSize="14" Height="200" Width="300">
+    <Grid >
+        <StackPanel VerticalAlignment="Center">
+            <TextBlock x:Name="alert" Foreground="Red" Margin="0 10" />
+            <StackPanel HorizontalAlignment="Center" Height="20" Orientation="Horizontal">
+                <TextBlock Text="Enter Title" />
+                <TextBox KeyDown="ColorTextBox_KeyDown" x:Name="ColorTextBox" Margin="20 0" MinWidth="150" />
+            </StackPanel>
+            <StackPanel Margin="0 20" HorizontalAlignment="Center" Orientation="Horizontal" >
+                <Button Click="ok_Click" Padding="5" x:Name="ok" Content="Ok" />
+                <Button Margin="20 0 " Click="cancel_Click" Padding="5" x:Name="cancel" Content="cancel" />
+            </StackPanel>
+        </StackPanel>
+        
+    </Grid>
+</Window>

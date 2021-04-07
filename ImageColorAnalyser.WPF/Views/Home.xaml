@@ -1,0 +1,196 @@
+﻿<Window x:Class="ImageColorAnalyser.WPF.Views.Home"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:local="clr-namespace:ImageColorAnalyser.WPF.Views" 
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
+        mc:Ignorable="d" Cursor="{Binding HomeModel.Cursor}" ResizeMode="NoResize"
+        Title="{Binding HomeModel.Title}" FontFamily="ariel" Height="550" WindowState="Maximized" Width="1100">
+    <Grid Margin="0">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="2*"/>
+                <RowDefinition Height="8*"/>
+            </Grid.RowDefinitions>
+            <DockPanel>
+                <StackPanel  Background="GhostWhite" Orientation="Horizontal">
+                    <Button  Style="{StaticResource MenuBtn}"  Command="{Binding UploadCmd}" >
+                        <StackPanel Orientation="Horizontal">
+                            <fa:ImageAwesome  Icon="Upload"/>
+                            <TextBlock Style="{StaticResource MenuBtnText}"  Text="Upload" />
+
+                        </StackPanel>
+                    </Button>
+                    <Button  Style="{StaticResource MenuBtn}"  Command="{Binding SaveCmd}" CommandParameter="{Binding ElementName=canvas}" >
+                        <StackPanel Orientation="Horizontal">
+                            <fa:ImageAwesome  Icon="Save"/>
+                            <TextBlock Style="{StaticResource MenuBtnText}"  Text="Save" />
+
+                        </StackPanel>
+                    </Button>
+                    <Button  Style="{StaticResource MenuBtn}"  Command="{Binding ChangeTitleCmd}" >
+                        <StackPanel Orientation="Horizontal">
+                            <fa:ImageAwesome  Icon="Edit"/>
+                            <TextBlock Style="{StaticResource MenuBtnText}"  Text="Edit Title" />
+
+                        </StackPanel>
+                    </Button>
+                    <Button  Style="{StaticResource MenuBtn}"  Command="{Binding ClearCmd}"
+                         CommandParameter="{Binding ElementName=canvas}">
+                        <StackPanel Orientation="Horizontal">
+                            <fa:ImageAwesome  Icon="Close"/>
+                            <TextBlock Style="{StaticResource MenuBtnText}"  Text="Clear" />
+
+                        </StackPanel>
+                    </Button>
+                    <Button  Style="{StaticResource MenuBtn}"  Command="{Binding UndoCmd}" 
+                         CommandParameter="{Binding ElementName=canvas}" >
+                        <StackPanel Orientation="Horizontal">
+                            <fa:ImageAwesome  Icon="Undo"/>
+                            <TextBlock Style="{StaticResource MenuBtnText}"  Text="Undo" />
+
+                        </StackPanel>
+                    </Button>
+
+                </StackPanel>
+                <StackPanel  VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <fa:ImageAwesome Visibility="{Binding HomeModel.Loader}" Height="30" Width="50" Spin="True" Icon="Refresh" />
+                </StackPanel>
+
+            </DockPanel>
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="2*"/>
+                    <RowDefinition Height="1*"/>
+                </Grid.RowDefinitions>
+                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock x:Name="SelectedImageTextBlock" Foreground="Teal" FontWeight="SemiBold" FontSize="14">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}Selected File : {0}">
+                                <Binding Path="HomeModel.FileName" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </Grid>
+               
+                <Grid Grid.Row="1" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.2*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel  HorizontalAlignment="Center"  VerticalAlignment="Center" Orientation="Horizontal">
+                        <TextBlock Foreground="ForestGreen" Margin="5" FontSize="14" FontWeight="SemiBold" Text="Select Color"/>
+                        <TextBlock HorizontalAlignment="Center" Text="{Binding HomeModel.ColorCode,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                   FontSize="14" VerticalAlignment="Center" MinWidth="68" Margin="5" x:Name="colorTextBlock"/>
+                        <xctk:ColorPicker SelectedColor="{Binding HomeModel.SelectedColor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="colorPicker" Width="45"   >
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectedColorChanged">
+                                    <i:InvokeCommandAction Command="{Binding Path=ColorChangedCmd}" CommandParameter="{Binding ElementName=colorPicker}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </xctk:ColorPicker>
+                        <Button Background="White" FontWeight="SemiBold" Foreground="DodgerBlue" Margin="10 0 30 0"
+                                CommandParameter="{Binding ElementName=canvas}" 
+                                Padding="8 0" Command="{Binding AnalyseImageCmd}" Content="Analyze" >
+                            
+                        </Button>
+
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Choose Operation"/>
+                        <ComboBox Height="25" x:Name="OpComboBox" MinWidth="90" Margin="20 0" >
+                            <ComboBoxItem>
+                                <TextBlock Text="None"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="Draw"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="Resize"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="Change Name"/>
+                            </ComboBoxItem>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectionChanged">
+                                    <i:InvokeCommandAction Command="{Binding OpChangedCmd}" CommandParameter="{Binding SelectedValue, ElementName=OpComboBox}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock VerticalAlignment="Center" Text="Enter Color Name"/>
+                        <TextBox Height="25" VerticalContentAlignment="Center" Margin="20 0" MinWidth="100"
+                            Text="{Binding HomeModel.ColorName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock VerticalAlignment="Center" Text="Select Shape"/>
+                        <ComboBox Height="25" x:Name="ShapeComboBox" MinWidth="90" Margin="20 0" >
+                            <ComboBoxItem>
+                                <TextBlock Text="Rectangle"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem>
+                                <TextBlock Text="Circle"/>
+                            </ComboBoxItem>
+                            <i:Interaction.Triggers>
+                                <i:EventTrigger EventName="SelectionChanged">
+                                    <i:InvokeCommandAction   Command="{Binding ShapeChangedCmd}"  CommandParameter="{Binding SelectedValue, ElementName=ShapeComboBox}"/>
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Center"  VerticalAlignment="Center" Orientation="Horizontal">
+                        <!--<TextBlock VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold">Select Shape</TextBlock>-->
+
+                    </StackPanel>
+                    <!--<Button Grid.Column="3" Margin="15 2" Background="Wheat" Padding="5 0" Click="Button_Click" Content="Change Title"/>-->
+                    <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal" VerticalAlignment="Center" Grid.Column="3" Margin="15 2">
+
+                    </StackPanel>
+
+
+                </Grid>
+                <TextBlock Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Text="{Binding HomeModel.Message,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+
+            </Grid>
+            <Border Margin="10 4" Grid.Row="2" BorderBrush="Black" BorderThickness="1">
+                <Canvas VerticalAlignment="Stretch" HorizontalAlignment="Stretch" x:Name="canvas">
+                    <Image x:Name="img" Width="{Binding ActualWidth, ElementName=canvas}"   Height="{Binding ActualHeight, ElementName=canvas}"
+                               HorizontalAlignment="Left" VerticalAlignment="Top" 
+                               Source="{Binding HomeModel.FileName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                    
+                                   />
+                    
+                    <!--{Binding HomeModel.FileName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged} C:\Users\844617\Downloads\red.png-->
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="MouseUp">
+                            <i:InvokeCommandAction Command="{Binding MouseUpCmd}" CommandParameter="{Binding ElementName=canvas}" />
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseDown">
+                            <i:InvokeCommandAction Command="{Binding MouseDownCmd}" CommandParameter="{Binding ElementName=canvas}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="MouseMove">
+
+                            <i:InvokeCommandAction Command="{Binding MouseMoveCmd}" CommandParameter="{Binding ElementName=canvas}"/>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+
+                </Canvas>
+
+
+            </Border>
+
+            
+        </Grid>
+    </Grid>
+</Window>

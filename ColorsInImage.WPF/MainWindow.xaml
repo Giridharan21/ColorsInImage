@@ -1,0 +1,85 @@
+﻿<Window x:Class="ColorsInImage.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ColorsInImage.WPF"
+        mc:Ignorable="d"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:s="clr-namespace:ColorsInImage.WPF.Models"
+        Title="IMAGE COLOR ANALYZER" MinWidth="1000" MinHeight="500" Height="450" Width="800" WindowStartupLocation="CenterScreen" 
+        IsTabStop="False" WindowStyle="ThreeDBorderWindow" Visibility="Visible" WindowState="Maximized">
+    <Window.Effect>
+        <DropShadowEffect Color="#FF1DB68C" Opacity="0.8" ShadowDepth="5"/>
+        
+    </Window.Effect>
+    <Grid>
+        
+        <Grid  Background="White"  Margin="0 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel  Visibility="Visible" Margin="20 15 20 15" Background="GhostWhite" Orientation="Horizontal">
+                <Button  Margin="0 0 0 0" Width="100" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left"  Click="SelectImage_ClickAsync">
+                    <StackPanel Orientation="Horizontal">
+                        <Image VerticalAlignment="Bottom" Width="25" Margin=" 0 0 5 0" Source="/icons/upload.png" />
+                        <TextBlock VerticalAlignment="Bottom" FontSize="15" FontWeight="SemiBold" >Upload</TextBlock>
+
+                    </StackPanel>    
+                </Button>
+                <Button Margin="0 0 0 0" Width="100" Background="Transparent" Click="SaveImage_Click" BorderThickness="0" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal">
+                        <Image VerticalAlignment="Bottom" Width="20" Margin="0 0 5 0" Source="/icons/save2.png" />
+                        <TextBlock VerticalAlignment="Bottom" FontSize="15" FontWeight="SemiBold" >Save</TextBlock>
+
+                    </StackPanel>
+                </Button>
+                <Button Margin="0 0 0 0" Width="100" Click="Button_Click" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal">
+                        <Image VerticalAlignment="Bottom" Width="20" Margin="0 0 5 0" Source="/icons/edit.png" />
+                        <TextBlock VerticalAlignment="Bottom" FontSize="15" FontWeight="SemiBold" >Edit Title</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button Margin="0 0 0 0" Width="100" Background="Transparent" Click="MenuItem_Click" BorderThickness="0" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal">
+                        <Image VerticalAlignment="Bottom" Width="20" Margin="0 0 5 0" Source="/icons/clear.png" />
+                        <TextBlock VerticalAlignment="Bottom" FontSize="15" FontWeight="SemiBold" >Clear</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button Margin="0 0 0 0" Width="100" Background="Transparent" BorderThickness="0" Click="Undo_Click" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal">
+                        <Image VerticalAlignment="Bottom" Width="20" Margin="0 0 5 0" Source="/icons/undo.jpg" />
+                        <TextBlock VerticalAlignment="Bottom" FontSize="15" FontWeight="SemiBold" >Undo</TextBlock>
+                    </StackPanel>
+                </Button>
+                
+            </StackPanel>
+            <Menu Visibility="Collapsed" VerticalContentAlignment="Center" BorderThickness="0" Background="White" FontWeight="DemiBold" FontSize="16" Foreground="Black" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" >
+                <MenuItem Width="90" Header="Upload"   HorizontalAlignment="Center" Background="Transparent"  Name="SelectImage" Click="SelectImage_ClickAsync" >
+                    <MenuItem.Icon >
+                        <Image Height="20" Width="40" VerticalAlignment="Center" HorizontalAlignment="Center" Source="/icons/upload.png" />
+                    </MenuItem.Icon>
+                        
+                </MenuItem>
+                <!--<MenuItem Header="Cancel" Visibility="Collapsed" Name="CancelMark" Click="CancelMark_Click" />
+                <MenuItem Visibility="Collapsed"><Image Source="/icons/clear.png" />
+
+                    <MenuItem Header="Draw" Visibility="Collapsed" Name="DrawShape" Click="DrawShape_Click" />
+                    <MenuItem Header="Add Name" Visibility="Collapsed"  Name="AddName" Click="AddName_Click" />
+                    <MenuItem Header="Cancel" Visibility="Collapsed" Name="CancelDraw" Click="CancelDraw_Click" />
+                </MenuItem>-->
+                <MenuItem Header="Save As" Visibility="Visible" Name="SaveImage" Click="SaveImage_Click" />
+                <MenuItem   Padding="5 0" Click="Button_Click" Header="Change Title"/>
+                <MenuItem   Padding="5 0" Click="MenuItem_Click" Header="Clear"/>
+                <MenuItem Header="Undo" Visibility="Visible" Name="Undo" Click="Undo_Click" />
+
+            </Menu>
+            <Frame NavigationUIVisibility="Hidden" x:Name="ParentFrame" Grid.Row="1" />
+        </Grid>
+        
+    </Grid>
+</Window>
