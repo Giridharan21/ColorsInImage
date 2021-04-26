@@ -7,13 +7,14 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:local="clr-namespace:ImageColorAnalyser.WPF.Views" 
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit" 
-        mc:Ignorable="d" Cursor="{Binding HomeModel.Cursor}" ResizeMode="NoResize"
-        Title="{Binding HomeModel.Title}" FontFamily="ariel" Height="550" WindowState="Maximized" Width="1100">
+        mc:Ignorable="d" Cursor="{Binding HomeModel.Cursor}" ResizeMode="CanResize" 
+        Title="{Binding HomeModel.Title}" FontFamily="ariel" MinWidth="1000" MinHeight="600" Height="550" WindowState="Normal" Width="1100" WindowStartupLocation="CenterScreen">
     <Grid Margin="0">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="40"/>
-                <RowDefinition Height="2*"/>
+                <RowDefinition Height="2*" MaxHeight="100"/>
+                
                 <RowDefinition Height="8*"/>
             </Grid.RowDefinitions>
             <DockPanel>
@@ -55,6 +56,15 @@
 
                         </StackPanel>
                     </Button>
+                    <Grid Margin="0 0 60 0 " VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <TextBlock x:Name="SelectedImageTextBlock" Foreground="Teal" FontWeight="SemiBold" FontSize="14">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}Selected File : {0}">
+                                    <Binding Path="HomeModel.FileName" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Grid>
 
                 </StackPanel>
                 <StackPanel  VerticalAlignment="Center" HorizontalAlignment="Right">
@@ -62,92 +72,121 @@
                 </StackPanel>
 
             </DockPanel>
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" MinHeight="100" MaxHeight="100">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="5"/>
                     <RowDefinition Height="*"/>
-                    <RowDefinition Height="2*"/>
-                    <RowDefinition Height="1*"/>
+                    <RowDefinition Height="5"/>
                 </Grid.RowDefinitions>
-                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock x:Name="SelectedImageTextBlock" Foreground="Teal" FontWeight="SemiBold" FontSize="14">
-                        <TextBlock.Text>
-                            <MultiBinding StringFormat="{}Selected File : {0}">
-                                <Binding Path="HomeModel.FileName" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-                </Grid>
-               
-                <Grid Grid.Row="1" VerticalAlignment="Center">
+
+
+                <Grid Grid.Row="1" VerticalAlignment="Stretch">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+
+                        <RowDefinition  Height="*"/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1.2*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel  HorizontalAlignment="Center"  VerticalAlignment="Center" Orientation="Horizontal">
-                        <TextBlock Foreground="ForestGreen" Margin="5" FontSize="14" FontWeight="SemiBold" Text="Select Color"/>
-                        <TextBlock HorizontalAlignment="Center" Text="{Binding HomeModel.ColorCode,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
-                                   FontSize="14" VerticalAlignment="Center" MinWidth="68" Margin="5" x:Name="colorTextBlock"/>
-                        <xctk:ColorPicker SelectedColor="{Binding HomeModel.SelectedColor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="colorPicker" Width="45"   >
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="SelectedColorChanged">
-                                    <i:InvokeCommandAction Command="{Binding Path=ColorChangedCmd}" CommandParameter="{Binding ElementName=colorPicker}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </xctk:ColorPicker>
-                        <Button Background="White" FontWeight="SemiBold" Foreground="DodgerBlue" Margin="10 0 30 0"
+                    <Grid Grid.Row="0"  >
+                        <StackPanel  VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
+
+                            <StackPanel  HorizontalAlignment="Center"  VerticalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock Foreground="ForestGreen" Margin="5" FontSize="14" FontWeight="SemiBold" Text="Color to Detect"/>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding HomeModel.ColorCode,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                   FontSize="14" VerticalAlignment="Center" MinWidth="40" Margin="5" x:Name="colorTextBlock"/>
+                                <xctk:ColorPicker SelectedColor="{Binding HomeModel.SelectedColor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="colorPicker" Width="45"   >
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectedColorChanged">
+                                            <i:InvokeCommandAction Command="{Binding Path=ColorChangedCmd}" CommandParameter="{Binding ElementName=colorPicker}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </xctk:ColorPicker>
+                                <StackPanel Grid.Row="1"  Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock FontSize="14"  VerticalAlignment="Center" Margin="10 0">Color for Shape</TextBlock>
+                                    <xctk:ColorPicker  SelectedColor="{Binding HomeModel.ShapeColor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="shapeColorPicker" Width="45"   >
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="SelectedColorChanged">
+                                                <i:InvokeCommandAction Command="{Binding Path=ShapeColorChangedCmd}" CommandParameter="{Binding ElementName=shapeColorPicker}"/>
+                                            </i:EventTrigger>
+                                        </i:Interaction.Triggers>
+                                    </xctk:ColorPicker>
+
+                                </StackPanel>
+
+                                
+
+                            </StackPanel>
+
+                            <StackPanel Margin="20 0 0 0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock FontSize="14"  VerticalAlignment="Center" Text="Choose Operation"/>
+                                <ComboBox Height="25" x:Name="OpComboBox" MinWidth="90" Margin="20 0" >
+                                    <ComboBoxItem>
+                                        <TextBlock Text="None"/>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Draw"/>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Resize"/>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Change Name"/>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Remove"/>
+                                    </ComboBoxItem>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectionChanged">
+                                            <i:InvokeCommandAction Command="{Binding OpChangedCmd}" CommandParameter="{Binding SelectedValue, ElementName=OpComboBox}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
+                            </StackPanel>
+                            <Button Background="White" FontWeight="SemiBold" FontSize="14" MinWidth="80" VerticalContentAlignment="Center" Foreground="DodgerBlue" Margin="10 0 10 0"
                                 CommandParameter="{Binding ElementName=canvas}" 
                                 Padding="8 0" Command="{Binding AnalyseImageCmd}" Content="Analyze" >
+
+                            </Button>
+
+
                             
-                        </Button>
 
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="Choose Operation"/>
-                        <ComboBox Height="25" x:Name="OpComboBox" MinWidth="90" Margin="20 0" >
-                            <ComboBoxItem>
-                                <TextBlock Text="None"/>
-                            </ComboBoxItem>
-                            <ComboBoxItem>
-                                <TextBlock Text="Draw"/>
-                            </ComboBoxItem>
-                            <ComboBoxItem>
-                                <TextBlock Text="Resize"/>
-                            </ComboBoxItem>
-                            <ComboBoxItem>
-                                <TextBlock Text="Change Name"/>
-                            </ComboBoxItem>
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="SelectionChanged">
-                                    <i:InvokeCommandAction Command="{Binding OpChangedCmd}" CommandParameter="{Binding SelectedValue, ElementName=OpComboBox}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </ComboBox>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock VerticalAlignment="Center" Text="Enter Color Name"/>
-                        <TextBox Height="25" VerticalContentAlignment="Center" Margin="20 0" MinWidth="100"
+                        </StackPanel>
+                    </Grid>
+                    <Grid Grid.Row="1"  >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"  Orientation="Horizontal" Grid.ColumnSpan="2">
+                            
+                            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock FontSize="14"  VerticalAlignment="Center" Text="Enter Color Name"/>
+                                <TextBox Height="25" VerticalContentAlignment="Center" Margin="20 0" MinWidth="100"
                             Text="{Binding HomeModel.ColorName,UpdateSourceTrigger=PropertyChanged,Mode=TwoWay}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock VerticalAlignment="Center" Text="Select Shape"/>
-                        <ComboBox Height="25" x:Name="ShapeComboBox" MinWidth="90" Margin="20 0" >
-                            <ComboBoxItem>
-                                <TextBlock Text="Rectangle"/>
-                            </ComboBoxItem>
-                            <ComboBoxItem>
-                                <TextBlock Text="Circle"/>
-                            </ComboBoxItem>
-                            <i:Interaction.Triggers>
-                                <i:EventTrigger EventName="SelectionChanged">
-                                    <i:InvokeCommandAction   Command="{Binding ShapeChangedCmd}"  CommandParameter="{Binding SelectedValue, ElementName=ShapeComboBox}"/>
-                                </i:EventTrigger>
-                            </i:Interaction.Triggers>
-                        </ComboBox>
-                    </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1"  Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock FontSize="14"  VerticalAlignment="Center" Text="Select Shape"/>
+                                <ComboBox Height="25" x:Name="ShapeComboBox" MinWidth="90" Margin="20 0" >
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Rectangle"/>
+                                    </ComboBoxItem>
+                                    <ComboBoxItem>
+                                        <TextBlock Text="Circle"/>
+                                    </ComboBoxItem>
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectionChanged">
+                                            <i:InvokeCommandAction   Command="{Binding ShapeChangedCmd}"  CommandParameter="{Binding SelectedValue, ElementName=ShapeComboBox}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </ComboBox>
+                            </StackPanel>
+                            <Button x:Name="Correlate" Command="{Binding CorrelateCmd}" MinWidth="130"  Content="{Binding HomeModel.BtnContent}" Style="{StaticResource MenuBtn}" FontSize="14" BorderThickness="1" Foreground="Blue" Padding="2 5"></Button>
+
+                        </StackPanel>
+                    </Grid>
                     <StackPanel Grid.Column="1" HorizontalAlignment="Center"  VerticalAlignment="Center" Orientation="Horizontal">
                         <!--<TextBlock VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold">Select Shape</TextBlock>-->
 
@@ -164,33 +203,54 @@
 
             </Grid>
             <Border Margin="10 4" Grid.Row="2" BorderBrush="Black" BorderThickness="1">
-                <Canvas VerticalAlignment="Stretch" HorizontalAlignment="Stretch" x:Name="canvas">
-                    <Image x:Name="img" Width="{Binding ActualWidth, ElementName=canvas}"   Height="{Binding ActualHeight, ElementName=canvas}"
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition  Height="auto"/>
+                        <RowDefinition  Height="*"/>
+                        
+                    </Grid.RowDefinitions>
+                    <Canvas Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" x:Name="canvas">
+                        <Image x:Name="img" Width="{Binding ActualWidth, ElementName=canvas}"   Height="{Binding ActualHeight, ElementName=canvas}"
                                HorizontalAlignment="Left" VerticalAlignment="Top" 
                                Source="{Binding HomeModel.FileName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
                                     
                                    />
-                    
-                    <!--{Binding HomeModel.FileName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged} C:\Users\844617\Downloads\red.png-->
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseUp">
-                            <i:InvokeCommandAction Command="{Binding MouseUpCmd}" CommandParameter="{Binding ElementName=canvas}" />
-                        </i:EventTrigger>
-                        <i:EventTrigger EventName="MouseDown">
-                            <i:InvokeCommandAction Command="{Binding MouseDownCmd}" CommandParameter="{Binding ElementName=canvas}"/>
-                        </i:EventTrigger>
-                        <i:EventTrigger EventName="MouseMove">
 
-                            <i:InvokeCommandAction Command="{Binding MouseMoveCmd}" CommandParameter="{Binding ElementName=canvas}"/>
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
+                        <!--{Binding HomeModel.FileName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged} C:\Users\844617\Downloads\red.png-->
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseUp">
+                                <i:InvokeCommandAction Command="{Binding MouseUpCmd}" CommandParameter="{Binding ElementName=canvas}" />
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="MouseDown">
+                                <i:InvokeCommandAction Command="{Binding MouseDownCmd}" CommandParameter="{Binding ElementName=canvas}"/>
+                            </i:EventTrigger>
+                            <i:EventTrigger EventName="MouseMove">
 
-                </Canvas>
+                                <i:InvokeCommandAction Command="{Binding MouseMoveCmd}" CommandParameter="{Binding ElementName=canvas}"/>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
 
+                    </Canvas>
+                    <DataGrid  HorizontalScrollBarVisibility="Hidden" MinHeight="50" Visibility="{Binding HomeModel.IsDataGridVisible}" Grid.Row="0" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserReorderColumns="False" ItemsSource="{Binding HomeModel.ColorNames}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Red}" Header="Red" Width="1*"/>
+                            <DataGridTextColumn Binding="{Binding Blue}" Header="Blue" Width="1*"/>
+                            <DataGridTextColumn Binding="{Binding Green}" Header="Green" Width="1*"/>
+                            <DataGridTextColumn Binding="{Binding Violet}" Header="Violet" Width="1*"/>
+                            <DataGridTextColumn Binding="{Binding Indigo}" Header="Indigo" Width="1*"/>
+                            <DataGridTextColumn Binding="{Binding Yellow}" Header="Yellow" Width="1*"/>
+                            <DataGridTextColumn Binding="{Binding Orange}" Header="Orange" Width="1*"/>
+                            
+                        </DataGrid.Columns>
+                        
 
+                    </DataGrid>
+
+                </Grid>
+                
             </Border>
 
-            
+
         </Grid>
     </Grid>
 </Window>

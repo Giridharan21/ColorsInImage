@@ -22,6 +22,11 @@ using Toolkit = Xceed.Wpf.Toolkit;
 
 namespace ImageColorAnalyser.WPF.ViewModels
 {
+    public enum ElemType{
+        Rectangle,
+        Elipse,
+        Text
+    }
     public class HomeViewModel : BindableBase
     {
         private HomeModel homeModel;
@@ -37,7 +42,8 @@ namespace ImageColorAnalyser.WPF.ViewModels
 
         private bool anchorPointSet { get; set; }
         public CurrentOp CurrentOp { get; set; }
-        public System.Windows.Shapes.Rectangle CurrentRect { get; set; }
+        public UIElement CurrentElem { get; set; }
+        public ElemType CurrentElemType { get; set; }
         public Dictionary<System.Drawing.Color, List<CustomPosition>> pos { get; set; }
         public ICommand UploadCmd { get; set; }
         public ICommand SaveCmd { get; set; }
@@ -52,12 +58,17 @@ namespace ImageColorAnalyser.WPF.ViewModels
         public ICommand OpChangedCmd { get; set; }
         public ICommand ShapeChangedCmd { get; set; }
         public ICommand ChangeTitleCmd { get; set; }
+        public ICommand ShapeColorChangedCmd { get; set; }
+        public ICommand CorrelateCmd { get; set; }
         public HomeViewModel()
         {
             HomeModel = new HomeModel();
             HomeModel.Title = "Image Color Analyser";
             HomeModel.Loader = Visibility.Collapsed;
-            CurrentRect = new System.Windows.Shapes.Rectangle();
+            HomeModel.IsDataGridVisible = Visibility.Collapsed;
+            HomeModel.BtnContent = "Show Correlate";
+            HomeModel.ColorNames = new List<ColorNames>() { new ColorNames() };
+            CurrentElem = new System.Windows.Shapes.Rectangle();
             //homeModel.FileName = @"C:\Users\844617\Downloads\red.png";
             //homeModel.FileName = @"C:\Users\844617\Downloads\Testing-Image.png";
             UploadCmd = new DelegateCommand(UploadImage);
@@ -72,7 +83,33 @@ namespace ImageColorAnalyser.WPF.ViewModels
             OpChangedCmd = new DelegateCommand<object>(OpChanged);
             ShapeChangedCmd = new DelegateCommand<object>(ShapeChanged);
             ChangeTitleCmd = new DelegateCommand(ChangeTitle);
+            ShapeColorChangedCmd = new DelegateCommand<UIElement>(ShapeColorChanged);
+            CorrelateCmd = new DelegateCommand(Correlate);
 
+        }
+
+        private void Correlate()
+        {
+            try
+            {
+                
+                if(HomeModel.BtnContent== "Show Correlate")
+                {
+                    HomeModel.BtnContent = "Hide Correlate";
+                    HomeModel.IsDataGridVisible = Visibility.Visible;
+                }
+                else if(HomeModel.BtnContent == "Hide Correlate")
+                {
+                    HomeModel.BtnContent = "Show Correlate";
+                    HomeModel.IsDataGridVisible = Visibility.Collapsed;
+
+                }
+            }
+            catch (Exception)
+            {
+
+                
+            }
         }
 
         private void ChangeTitle()
@@ -113,6 +150,9 @@ namespace ImageColorAnalyser.WPF.ViewModels
                     break;
                 case "Change Name":
                     CurrentOp = CurrentOp.ChangeName;
+                    break;
+                case "Remove":
+                    CurrentOp = CurrentOp.RemoveChild;
                     break;
                 default:
                     CurrentOp = CurrentOp.None;
@@ -241,141 +281,176 @@ namespace ImageColorAnalyser.WPF.ViewModels
         {
             HomeModel.ColorCode= ((Toolkit.ColorPicker)element)?.SelectedColor.GetValueOrDefault().ToString();
         }
+        private void ShapeColorChanged(UIElement element)
+        {
+            HomeModel.ShapeColorCode = ((Toolkit.ColorPicker)element)?.SelectedColor.GetValueOrDefault().ToString();
+        }
 
         private async void AnalyseImage(UIElement element)
         {
-            var canvas = (Canvas)element;
-            if (string.IsNullOrWhiteSpace(HomeModel.FileName))
+            try
             {
-                MessageBox.Show("Select a Image file (*.jpeg, *.jpg, *.png )", "Alert");
-                return;
-            }
-            var res = MessageBox.Show("Do you want to mark the shapes in Black?", "Alert", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            System.Drawing.Image img = null;
-            var additional = new AdditionalColor()
-            {
-                HasValue = HomeModel.ColorCode != null,
-            };
-            HomeModel.Loader = Visibility.Visible;
-
-            if (additional.HasValue)
-            {
-                var c = HomeModel.SelectedColor.GetValueOrDefault();
-                additional.colorCode = System.Drawing.Color.FromArgb(c.R, c.G, c.B);
-                additional.ColorName = HomeModel.SelectedColor.GetValueOrDefault().ToString();
-                //img = await Program.ProcessImage(HomeModel.FileName, res == MessageBoxResult.Yes);
-                (img, pos) = await Program.ProcessImage2(HomeModel.FileName, res == MessageBoxResult.OK, additional: additional);
-                
-            }
-            else
-            {
-                //img = await Program.ProcessImage(HomeModel.FileName, res == MessageBoxResult.Yes);
-                (img,pos)  = await Program.ProcessImage2(HomeModel.FileName, res == MessageBoxResult.OK);
-
-            }
-            var imgPath = @"C:\Program Files (x86)\Image Analyser";
-            if (!Directory.Exists(imgPath))
-            {
-                Directory.CreateDirectory(imgPath);
-            }
-            var imgName = System.IO.Path.Combine(imgPath, "temp " + GetDateTime() + ".png");
-            img.Save(imgName);
-            HomeModel.FileName = imgName;
-            
-            
-            
-            var brush = res == MessageBoxResult.Yes ? System.Windows.Media.Brushes.Black : System.Windows.Media.Brushes.WhiteSmoke;
-            var x = img.HorizontalResolution;
-            var y = img.VerticalResolution;
-            var iH = img.Height; //1104
-            var iW = img.Width; //1824
-            int gcd = GetGCD(iW, iH);
-            var ratio = (double)iW / iH;
-            var aspectRatioW = iW / gcd;
-            var aspectRatioH = iH / gcd;
-
-            int aH = 0, aW = 0;
-
-            var w = canvas.ActualWidth;
-            var h = canvas.ActualHeight;
-
-            if ((iH > h && iW > w) || (iH<h && iW < w))
-            {
-                if (h > w)
+                var canvas = (Canvas)element;
+                if (string.IsNullOrWhiteSpace(HomeModel.FileName))
                 {
-                    aH = (int)(w / ratio);
-                    aW = (int)w;
+                    MessageBox.Show("Select a Image file (*.jpeg, *.jpg, *.png )", "Alert");
+                    return;
+                }
+                //var res = MessageBox.Show("Do you want to mark the shapes in Black?", "Alert", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                System.Drawing.Image img = null;
+                var additional = new AdditionalColor()
+                {
+                    HasValue = HomeModel.ColorCode != null,
+                };
+                if(HomeModel.BtnContent == "Hide Correlate")
+                {
+                    Correlate();
+                }
+                HomeModel.Loader = Visibility.Visible;
+
+                if (additional.HasValue)
+                {
+                    var c = HomeModel.SelectedColor.GetValueOrDefault();
+                    additional.colorCode = System.Drawing.Color.FromArgb(c.R, c.G, c.B);
+                    additional.ColorName = HomeModel.SelectedColor.GetValueOrDefault().ToString();
+                    //img = await Program.ProcessImage(HomeModel.FileName, res == MessageBoxResult.Yes);
+                    (img, pos) = await Program.ProcessImage2(HomeModel.FileName,false, additional: additional);
+
                 }
                 else
                 {
-                    aW = (int)(ratio * h);
-                    aH = (int)h;
+                    //img = await Program.ProcessImage(HomeModel.FileName, res == MessageBoxResult.Yes);
+                    (img, pos) = await Program.ProcessImage2(HomeModel.FileName, false);
+
                 }
-            }
-            else if (iH < h && iW > w)
-            {
-                aW = (int)w;
-                aH = (int)(w / ratio);
-            }
-            else if (iH > h && iW < w)
-            {
-                aH = (int)h;
-                aW = (int)(ratio * h);
-            }
+                //var imgPath = @"C:\Program Files (x86)\Image Analyser";
+                //if (!Directory.Exists(imgPath))
+                //{
+                //    Directory.CreateDirectory(imgPath);
+                //}
+                //var imgName = System.IO.Path.Combine(imgPath, "temp " + GetDateTime() + ".png");
+                //img.Save(imgName);
+                //HomeModel.FileName = imgName;
 
-            var wMul =  (double)aW / iW;
-            var hMul = (double)aH / iH;
 
-            foreach (var color in pos.Keys)
-            {
-                foreach (var pos in pos[color])
+
+                var brush = HomeModel.ShapeColor.HasValue ? new SolidColorBrush(HomeModel.ShapeColor.Value) : System.Windows.Media.Brushes.Black;
+                var x = img.HorizontalResolution;
+                var y = img.VerticalResolution;
+                var iH = img.Height; //1104
+                var iW = img.Width; //1824
+                int gcd = GetGCD(iW, iH);
+                var ratio = (double)iW / iH;
+                var aspectRatioW = iW / gcd;
+                var aspectRatioH = iH / gcd;
+
+                int aH = 0, aW = 0;
+
+                var w = canvas.ActualWidth;
+                var h = canvas.ActualHeight;
+
+                if ((iH > h && iW > w) || (iH < h && iW < w))
                 {
-                    
-                    //var wMul = 1;
-                    //var hMul = 1;
-                    
-
-                    
-
-                    var r = new System.Windows.Shapes.Rectangle()
+                    if (h > w)
                     {
-                        Stroke = brush,
-                        StrokeThickness = 2
-                    };
-
-                    //var canvasWidth = canvas.ActualWidth;
-                    //var diff = (canvasWidth - imgWidth) / 2;
-                    //pos.ResizeRect(wP, hP);
-                    var minimizedWidth = Math.Abs((pos.Rect.Width * wMul));
-                    //minimizedWidth -= minimizedWidth * (wMul * 0.4);
-                    r.Width = minimizedWidth;
-                    var minimizedHeight = Math.Abs((pos.Rect.Height * hMul));
-                    //minimizedHeight -= minimizedHeight * hMul * 0.20;
-                    r.Height = minimizedHeight;
-                    var t = new TextBlock();
-                    t.Foreground = brush;
-                    t.Text = color.Name;
-                    pos.Y = pos.Y * hMul;// - (pos.Y * hP);
-                    pos.X = (pos.X * wMul);// - (pos.X * wP);
-                    //pos.X -= (pos.X * 0.5 * wMul);// - (pos.X * wP);
-                    Canvas.SetTop(r, pos.Y);
-                    Canvas.SetLeft(r, pos.X);
-                    Canvas.SetTop(t, pos.Y - 20);
-                    Canvas.SetLeft(t, pos.X);
-
-
-                    canvas.Children.Add(r);
-                    canvas.Children.Add(t);
-                    //g.DrawRectangle(new System.Drawing.Pen(System.Drawing.Color.Black), pos.rect);
-                    //g.DrawString(color.Name, font, Brushes.Black, pos.x + 10, pos.y - 50);
+                        aH = (int)(w / ratio);
+                        aW = (int)w;
+                    }
+                    else
+                    {
+                        aW = (int)(ratio * h);
+                        aH = (int)h;
+                    }
                 }
-            }
-            //clearCanvas();
-            HomeModel.Loader = Visibility.Collapsed;
+                else if (iH < h && iW > w)
+                {
+                    aW = (int)w;
+                    aH = (int)(w / ratio);
+                }
+                else if (iH > h && iW < w)
+                {
+                    aH = (int)h;
+                    aW = (int)(ratio * h);
+                }
 
-            HomeModel.CurrentImage = GetBitMapImage(img);
-            //SelectedImage = null;
-            //SelectedImageTextBlock.Text = "No File Selected";
+                var wMul = (double)aW / iW;
+                var hMul = (double)aH / iH;
+
+                foreach (var color in pos.Keys)
+                {
+                    foreach (var pos in pos[color])
+                    {
+
+                        //var wMul = 1;
+                        //var hMul = 1;
+
+
+
+
+                        var r = new System.Windows.Shapes.Rectangle()
+                        {
+                            Stroke = brush,
+                            StrokeThickness = 2
+                        };
+
+                        //var canvasWidth = canvas.ActualWidth;
+                        //var diff = (canvasWidth - imgWidth) / 2;
+                        //pos.ResizeRect(wP, hP);
+                        var minimizedWidth = Math.Abs((pos.Rect.Width * wMul));
+                        //minimizedWidth -= minimizedWidth * (wMul * 0.4);
+                        r.Width = minimizedWidth;
+                        var minimizedHeight = Math.Abs((pos.Rect.Height * hMul));
+                        //minimizedHeight -= minimizedHeight * hMul * 0.20;
+                        r.Height = minimizedHeight;
+                        var t = new TextBlock();
+                        t.Foreground = brush;
+                        var name = GetColorName(color.Name);
+                        t.Text = name ?? color.Name;
+                        pos.Y = pos.Y * hMul;// - (pos.Y * hP);
+                        pos.X = (pos.X * wMul);// - (pos.X * wP);
+                                               //pos.X -= (pos.X * 0.5 * wMul);// - (pos.X * wP);
+                        Canvas.SetTop(r, pos.Y);
+                        Canvas.SetLeft(r, pos.X);
+                        Canvas.SetTop(t, pos.Y - 20);
+                        Canvas.SetLeft(t, pos.X);
+
+
+                        canvas.Children.Add(r);
+                        canvas.Children.Add(t);
+                        //g.DrawRectangle(new System.Drawing.Pen(System.Drawing.Color.Black), pos.rect);
+                        //g.DrawString(color.Name, font, Brushes.Black, pos.x + 10, pos.y - 50);
+                    }
+                }
+                //clearCanvas();
+                HomeModel.Loader = Visibility.Collapsed;
+
+                HomeModel.CurrentImage = GetBitMapImage(img);
+                //SelectedImage = null;
+                //SelectedImageTextBlock.Text = "No File Selected";
+            }
+            catch (Exception exp)
+            {
+
+                MessageBox.Show(exp.Message + "\n"+exp.ToString());
+            }
+            
+        }
+        private string GetColorName(string name)
+        {
+            var y = HomeModel.ColorNames[0];
+
+            try
+            {
+                return y.GetType().GetProperty(name).GetValue(y).ToString();
+            }
+            catch (Exception)
+            {
+
+                return null;
+            }
+            
+
+            
         }
 
         private int GetGCD(int iW, int iH)
@@ -390,13 +465,31 @@ namespace ImageColorAnalyser.WPF.ViewModels
             return gcd;
         }
 
-        private HitType SetHitType(System.Windows.Shapes.Rectangle rect, System.Windows.Point point)
+        private HitType SetHitType(UIElement rect, System.Windows.Point point)
         {
             double left = Canvas.GetLeft(rect);
             double top = Canvas.GetTop(rect);
-            double right = left + rect.Width;
-            double bottom = top + rect.Height;
-            if(double.IsNaN(left))
+            double right = 0;//= left + rect.Width;
+            double bottom = 0;// = top + rect.Height;
+            if (CurrentElemType == ElemType.Rectangle)
+            {
+                right = left+ (CurrentElem as System.Windows.Shapes.Rectangle).Width;
+                bottom = top+ (CurrentElem as System.Windows.Shapes.Rectangle).Height;
+
+            }
+            else if (CurrentElemType == ElemType.Elipse)
+            {
+                right = left + (CurrentElem as System.Windows.Shapes.Ellipse).Width;
+                bottom = top + (CurrentElem as System.Windows.Shapes.Ellipse).Height;
+            }
+            else if (CurrentElemType == ElemType.Text)
+            {
+                right = left + (CurrentElem as TextBlock).Width;
+                bottom = top + (CurrentElem as TextBlock).Height;
+                return HitType.Body;
+
+            }
+            if (double.IsNaN(left))
             {
                 return HitType.None;
             }
@@ -465,6 +558,10 @@ namespace ImageColorAnalyser.WPF.ViewModels
             {
                 ResizeMouseDown(element);
             }
+            else if(CurrentOp == CurrentOp.RemoveChild)
+            {
+                RemoveChildFromCanvas(element);
+            }
             else if (CurrentOp == CurrentOp.Draw)
             {
                 if (string.IsNullOrEmpty(homeModel.ColorName))
@@ -526,6 +623,36 @@ namespace ImageColorAnalyser.WPF.ViewModels
             DragInProgress = false;
         }
 
+        private void RemoveChildFromCanvas(UIElement element)
+        {
+            var canvas1 = (Canvas)element;
+            if (canvas1 == null)
+                return;
+            UIElement selectedChild = null;
+            foreach (var x in canvas1.Children)
+            {
+                var r = x as System.Windows.Shapes.Rectangle;
+                var c = x as Ellipse;
+                var t = x as TextBlock;
+                if( r!= null && r.IsMouseOver)
+                {
+                    selectedChild = r;
+                    break;
+                }
+                else if (c != null && c.IsMouseOver)
+                {
+                    selectedChild = c;
+                    break;
+                }
+                else if (t != null && t.IsMouseOver)
+                {
+                    selectedChild = t;
+                    break;
+                }
+
+            }
+            canvas1.Children.Remove(selectedChild);
+        }
         private void ResizeMouseDown(UIElement element)
         {
             var canvas1 = (Canvas)element;
@@ -534,14 +661,30 @@ namespace ImageColorAnalyser.WPF.ViewModels
             foreach (var x in canvas1.Children)
             {
                 var r = x as System.Windows.Shapes.Rectangle;
-                if (r == null)
-                    continue;
-                if (r.IsMouseOver)
-                    CurrentRect = r;
+                var e =  x as System.Windows.Shapes.Ellipse;
+                var t =  x as TextBlock;
+
+                if (r != null && r.IsMouseOver)
+                {
+                    CurrentElem = r;
+
+                    CurrentElemType = ElemType.Rectangle;
+                }
+                else if (e != null && e.IsMouseOver)
+                {
+                    CurrentElem = e;
+                    CurrentElemType = ElemType.Elipse;
+                }
+                else if (t != null && t.IsMouseOver)
+                {
+                    CurrentElem = t;
+                    CurrentElemType = ElemType.Text;
+                }
+
             }
-            if (CurrentRect == null)
+            if (CurrentElem == null)
                 return;
-            MouseHitType = SetHitType(CurrentRect, Mouse.GetPosition(canvas1));
+            MouseHitType = SetHitType(CurrentElem, Mouse.GetPosition(canvas1));
             SetMouseCursor();
             if (MouseHitType == HitType.None) return;
 
@@ -553,11 +696,11 @@ namespace ImageColorAnalyser.WPF.ViewModels
             var canvas1 = (Canvas)element;
             if (canvas1 == null)
                 return;
-            if (CurrentRect == null)
+            if (CurrentElem == null)
                 return;
             if (!DragInProgress)
             {
-                MouseHitType = SetHitType(CurrentRect, Mouse.GetPosition(canvas1));
+                MouseHitType = SetHitType(CurrentElem, Mouse.GetPosition(canvas1));
                 SetMouseCursor();
             }
             else
@@ -568,11 +711,26 @@ namespace ImageColorAnalyser.WPF.ViewModels
                 double offset_y = point.Y - LastPoint.Y;
 
                 // Get the rectangle's current position.
-                double new_x = Canvas.GetLeft(CurrentRect);
-                double new_y = Canvas.GetTop(CurrentRect);
-                double new_width = CurrentRect.Width;
-                double new_height = CurrentRect.Height;
+                double new_x = Canvas.GetLeft(CurrentElem);
+                double new_y = Canvas.GetTop(CurrentElem);
+                double new_width = 0; 
+                double new_height = 0;
+                if (CurrentElemType == ElemType.Rectangle)
+                {
+                    new_width = (CurrentElem as System.Windows.Shapes.Rectangle).Width;
+                    new_height = (CurrentElem as System.Windows.Shapes.Rectangle).Height;
 
+                }
+                else if(CurrentElemType == ElemType.Elipse)
+                {
+                    new_width = (CurrentElem as System.Windows.Shapes.Ellipse).Width;
+                    new_height = (CurrentElem as System.Windows.Shapes.Ellipse).Height;
+                }
+                else if (CurrentElemType == ElemType.Text)
+                {
+                    new_width = (CurrentElem as TextBlock).ActualWidth;
+                    new_height = (CurrentElem as TextBlock).ActualHeight;
+                }
                 // Update the rectangle.
                 switch (MouseHitType)
                 {
@@ -620,10 +778,25 @@ namespace ImageColorAnalyser.WPF.ViewModels
                 if ((new_width > 0) && (new_height > 0))
                 {
                     // Update the rectangle.
-                    Canvas.SetLeft(CurrentRect, new_x);
-                    Canvas.SetTop(CurrentRect, new_y);
-                    CurrentRect.Width = new_width;
-                    CurrentRect.Height = new_height;
+                    Canvas.SetLeft(CurrentElem, new_x);
+                    Canvas.SetTop(CurrentElem, new_y);
+                    if (CurrentElemType == ElemType.Rectangle)
+                    {
+                        (CurrentElem as System.Windows.Shapes.Rectangle).Width = new_width;
+                        (CurrentElem as System.Windows.Shapes.Rectangle).Height = new_height;
+                    }
+                    else if (CurrentElemType == ElemType.Elipse)
+                    {
+                         (CurrentElem as System.Windows.Shapes.Ellipse).Width = new_width ;
+                         (CurrentElem as System.Windows.Shapes.Ellipse).Height = new_height;
+                    }
+                    else if (CurrentElemType == ElemType.Text)
+                    {
+                        (CurrentElem as TextBlock).Width = new_width;
+                        (CurrentElem as TextBlock).Height = new_height;
+                    }
+                    //CurrentElem.Width = new_width;
+                    //CurrentElem.Height = new_height;
 
                     // Save the mouse's new location.
                     LastPoint = point;
@@ -644,7 +817,7 @@ namespace ImageColorAnalyser.WPF.ViewModels
             {
                 DrawingShape = new System.Windows.Shapes.Rectangle()
                 {
-                    Stroke = System.Windows.Media.Brushes.Black,
+                    Stroke = HomeModel.ShapeColor.HasValue ? new SolidColorBrush(HomeModel.ShapeColor.Value ) : System.Windows.Media.Brushes.Black,
                     StrokeThickness = 2
                 };
             }
@@ -652,7 +825,7 @@ namespace ImageColorAnalyser.WPF.ViewModels
             {
                 DrawingShape = new Ellipse
                 {
-                    Stroke = System.Windows.Media.Brushes.Black,
+                    Stroke = HomeModel.ShapeColor.HasValue ? new SolidColorBrush(HomeModel.ShapeColor.Value) : System.Windows.Media.Brushes.Black,
                     StrokeThickness = 2
                 };
             }
@@ -704,6 +877,7 @@ namespace ImageColorAnalyser.WPF.ViewModels
                 var textBlock = new TextBlock();
                 textBlock.Text = HomeModel.ColorName;
                 textBlock.FontSize = 16;
+                textBlock.Foreground = HomeModel.ShapeColor.HasValue ? new SolidColorBrush(HomeModel.ShapeColor.Value) : System.Windows.Media.Brushes.Black;
                 canvas.Children.Add(textBlock);
                 Canvas.SetTop(textBlock, pt.Y - 25);
                 Canvas.SetLeft(textBlock, pt.X + 5);

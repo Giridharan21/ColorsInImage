@@ -138,7 +138,7 @@ namespace ColorsLib.Models
 
         }
 
-        public static async Task<( Image Img,Dictionary<Color, List<CustomPosition>> Pos)> ProcessImage2(string location, AdditionalColor additional = null)
+        public static async Task<(Image Img,Dictionary<Color, List<CustomPosition>> Pos)> ProcessImage2(string location, AdditionalColor additional = null)
         {
             ImageObj = new CustomImage();
 

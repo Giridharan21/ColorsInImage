@@ -6,7 +6,7 @@
     }
     public enum CurrentOp
     {
-        None,Draw,Resize,ChangeName
+        None,Draw,Resize,ChangeName,RemoveChild
     }
     public enum HitType
     {

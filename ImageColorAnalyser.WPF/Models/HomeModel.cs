@@ -24,6 +24,11 @@ namespace ImageColorAnalyser.WPF.Models
         private Cursor cursor;
         private string title;
         private Visibility loader;
+        private Color? shapeColor;
+        private string shapeColorCode;
+        private List<ColorNames> colorNames;
+        private Visibility isDataGridVisible;
+        private string btnContent;
 
         public Visibility Loader { get => loader; set => SetProperty(ref loader, value); }
         public string Title { get => title; set => SetProperty(ref title, value); }
@@ -32,6 +37,9 @@ namespace ImageColorAnalyser.WPF.Models
             get => colorCode;
             set => SetProperty(ref colorCode, value);
         }
+        public string BtnContent { get => btnContent; set => SetProperty(ref btnContent, value); }
+        public Visibility IsDataGridVisible { get => isDataGridVisible; set => SetProperty(ref isDataGridVisible, value); }
+        public List<ColorNames> ColorNames { get => colorNames; set => SetProperty(ref colorNames, value); }
         public string ColorName
         {
             get => colorName;
@@ -70,6 +78,16 @@ namespace ImageColorAnalyser.WPF.Models
         {
             get => selectedColor;
             set => SetProperty(ref selectedColor, value);
+        }
+        public Color? ShapeColor
+        {
+            get => shapeColor;
+            set => SetProperty(ref shapeColor, value);
+        }
+        public string ShapeColorCode
+        {
+            get => shapeColorCode;
+            set => SetProperty(ref shapeColorCode, value);
         }
         public Cursor Cursor
         {
