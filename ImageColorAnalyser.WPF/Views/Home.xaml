@@ -184,7 +184,8 @@
                                 </ComboBox>
                             </StackPanel>
                             <Button x:Name="Correlate" Command="{Binding CorrelateCmd}" MinWidth="130"  Content="{Binding HomeModel.BtnContent}" Style="{StaticResource MenuBtn}" FontSize="14" BorderThickness="1" Foreground="Blue" Padding="2 5"></Button>
-
+                            <TextBlock  Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center"
+                           Text="{Binding HomeModel.Message,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                     </Grid>
                     <StackPanel Grid.Column="1" HorizontalAlignment="Center"  VerticalAlignment="Center" Orientation="Horizontal">
@@ -198,8 +199,7 @@
 
 
                 </Grid>
-                <TextBlock Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center"
-                           Text="{Binding HomeModel.Message,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                
 
             </Grid>
             <Border Margin="10 4" Grid.Row="2" BorderBrush="Black" BorderThickness="1">

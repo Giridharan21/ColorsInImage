@@ -486,7 +486,7 @@ namespace ImageColorAnalyser.WPF.ViewModels
             {
                 right = left + (CurrentElem as TextBlock).Width;
                 bottom = top + (CurrentElem as TextBlock).Height;
-                return HitType.Body;
+                //return HitType.Body;
 
             }
             if (double.IsNaN(left))
