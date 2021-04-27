@@ -315,7 +315,8 @@ namespace ImageColorAnalyser.WPF.ViewModels
                     additional.ColorName = HomeModel.SelectedColor.GetValueOrDefault().ToString();
                     //img = await Program.ProcessImage(HomeModel.FileName, res == MessageBoxResult.Yes);
                     (img, pos) = await Program.ProcessImage2(HomeModel.FileName,false, additional: additional);
-
+                    HomeModel.SelectedColor = null;
+                    HomeModel.ColorCode = null;
                 }
                 else
                 {
