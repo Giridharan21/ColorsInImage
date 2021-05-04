@@ -11,12 +11,19 @@ using System.Windows.Media.Imaging;
 
 namespace ImageColorAnalyser.WPF.Models
 {
+    public class ColorWithName
+    {
+        public Brush FillColor { get; set; }
+        public string ColorName { get; set; }
+        public System.Drawing.Color SColor { get; set; }
+    }
     public class HomeModel : BindableBase
     {
         private string colorCode;
         private string colorName;
         private string fileName;
         private string message;
+        private int limit;
         private Shape selectedShape;
         private BitmapImage currentImage;
         private string savedImagePath;
@@ -29,9 +36,14 @@ namespace ImageColorAnalyser.WPF.Models
         private List<ColorNames> colorNames;
         private Visibility isDataGridVisible;
         private string btnContent;
+        private List<ColorWithName> presentColors;
+        private ColorWithName selectedColorName;
 
+        public ColorWithName SelectedColorName { get => selectedColorName; set => SetProperty(ref selectedColorName, value); }
+        public List<ColorWithName> PresentColors { get => presentColors; set => SetProperty(ref presentColors, value); }
         public Visibility Loader { get => loader; set => SetProperty(ref loader, value); }
         public string Title { get => title; set => SetProperty(ref title, value); }
+        public int Limit { get => limit; set => SetProperty(ref limit, value); }
         public string ColorCode
         {
             get => colorCode;

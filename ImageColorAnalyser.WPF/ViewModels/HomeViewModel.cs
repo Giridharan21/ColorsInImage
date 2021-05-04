@@ -68,7 +68,9 @@ namespace ImageColorAnalyser.WPF.ViewModels
             HomeModel.IsDataGridVisible = Visibility.Collapsed;
             HomeModel.BtnContent = "Show Correlate";
             HomeModel.ColorNames = new List<ColorNames>() { new ColorNames() };
+            HomeModel.Limit = 20;
             CurrentElem = new System.Windows.Shapes.Rectangle();
+            HomeModel.PresentColors = new List<ColorWithName>();
             //homeModel.FileName = @"C:\Users\844617\Downloads\red.png";
             //homeModel.FileName = @"C:\Users\844617\Downloads\Testing-Image.png";
             UploadCmd = new DelegateCommand(UploadImage);
@@ -161,8 +163,10 @@ namespace ImageColorAnalyser.WPF.ViewModels
             //CurrentOp = str == "None" ? CurrentOp.None : str == "Draw" ? CurrentOp.Draw : CurrentOp.Resize;
         }
 
-        private void UploadImage()
+        private async void UploadImage()
         {
+            HomeModel.PresentColors = new List<ColorWithName>();
+            homeModel.SelectedColorName = null;
             var dia = new OpenFileDialog();
             dia.Filter = "Image Files|*.jpg;*.png;*.bmp;*.jpeg; ";
             dia.Title = "Select an Image";
@@ -183,8 +187,28 @@ namespace ImageColorAnalyser.WPF.ViewModels
             //ImagePage.SelectedImageTextBlock.Text = "Selected Image : " + ImagePage.SelectedImage;
             //ImagePage.setImage(dia.FileName);
             HomeModel.CurrentImage = GetBitMapImage(fileName:dia.FileName);
+            HomeModel.Loader = Visibility.Visible;
+            HomeModel.Message = "Getting all colors in the image!.";
+            var colors = await Program.GetColors(HomeModel.FileName);
+            HomeModel.PresentColors = ColorToColorWithName(colors);
+            HomeModel.Loader = Visibility.Collapsed;
+            HomeModel.Message = "";
 
-            
+        }
+        private List<ColorWithName> ColorToColorWithName(List<System.Drawing.Color> colors)
+        {
+            var list = new List<ColorWithName>();
+            foreach (var x in colors)
+            {
+                var color = new ColorWithName()
+                {
+                    ColorName = " " + x.ToString(),
+                    FillColor = new SolidColorBrush(System.Windows.Media.Color.FromArgb(x.A, x.R, x.G, x.B)),
+                    SColor = x
+                };
+                list.Add(color);
+            }
+            return list;
         }
         private BitmapImage GetBitMapImage(System.Drawing.Image img =null,string fileName = null)
         {
@@ -300,28 +324,38 @@ namespace ImageColorAnalyser.WPF.ViewModels
                 System.Drawing.Image img = null;
                 var additional = new AdditionalColor()
                 {
-                    HasValue = HomeModel.ColorCode != null,
+                    //HasValue = HomeModel.ColorCode != null,
+                    HasValue = HomeModel.SelectedColorName !=null,
                 };
                 if(HomeModel.BtnContent == "Hide Correlate")
                 {
                     Correlate();
                 }
+                if(HomeModel.Loader == Visibility.Visible)
+                {
+                    MessageBox.Show("Please wait until color search is done");
+                    return;
+                }    
                 HomeModel.Loader = Visibility.Visible;
 
                 if (additional.HasValue)
                 {
                     var c = HomeModel.SelectedColor.GetValueOrDefault();
-                    additional.colorCode = System.Drawing.Color.FromArgb(c.R, c.G, c.B);
-                    additional.ColorName = HomeModel.SelectedColor.GetValueOrDefault().ToString();
-                    //img = await Program.ProcessImage(HomeModel.FileName, res == MessageBoxResult.Yes);
-                    (img, pos) = await Program.ProcessImage2(HomeModel.FileName,false, additional: additional);
+                    var color = HomeModel.SelectedColorName;
+                    
+                    additional.colorCode = color.SColor;
+                    additional.ColorName = color.ColorName;
+                    //additional.colorCode = System.Drawing.Color.FromArgb(c.R, c.G, c.B);
+                    //additional.ColorName = HomeModel.SelectedColor.GetValueOrDefault().ToString();
+                    ////img = await Program.ProcessImage(HomeModel.FileName, res == MessageBoxResult.Yes);
+                    (img, pos) = await Program.ProcessImage2(HomeModel.FileName,false, HomeModel.Limit, additional );
                     HomeModel.SelectedColor = null;
                     HomeModel.ColorCode = null;
                 }
                 else
                 {
                     //img = await Program.ProcessImage(HomeModel.FileName, res == MessageBoxResult.Yes);
-                    (img, pos) = await Program.ProcessImage2(HomeModel.FileName, false);
+                    (img, pos) = await Program.ProcessImage2(HomeModel.FileName, false, HomeModel.Limit);
 
                 }
                 //var imgPath = @"C:\Program Files (x86)\Image Analyser";

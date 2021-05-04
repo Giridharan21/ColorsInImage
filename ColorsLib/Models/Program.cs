@@ -5,6 +5,19 @@ using System.Threading.Tasks;
 
 namespace ColorsLib.Models
 {
+    public static class ExtensionMethods
+    {
+        public static bool ContainsColor(this IEnumerable<Color> list,Color c)
+        {
+            foreach (var i in list)
+            {
+                if (Program.CompareColors(i, c))
+                    return true;
+            }
+            return false;
+        }
+    }
+    
     public class Program
     {
         private static CustomImage ImageObj = new CustomImage();
@@ -82,23 +95,96 @@ namespace ColorsLib.Models
 
         }
 
-        public static async Task<(Image img, Dictionary<Color, List<CustomPosition>> pos)> ProcessImage2(string location, bool markInBlack = true, AdditionalColor additional = null)
+        public static async Task<List<Color>> GetColors(string location)
+        {
+            var colors = new List<Color>();
+            //Image img = System.Drawing.Image.FromFile(location);
+            ImageObj = new CustomImage();
+            await Task.Run(() =>
+            {
+                ImageObj.Image = new Bitmap(location);
+                var w = ImageObj.Image.Size.Width;
+                var h = ImageObj.Image.Size.Height;
+                var count = GetCount((long)w *(long) h);
+                for (int i = 0; i < ImageObj.Image.Width; i+=count)
+                {
+                    for (int j = 0; j < ImageObj.Image.Height; j++)
+                    {
+                        var pixel = ImageObj.Image.GetPixel(i, j);
+                        if (!colors.ContainsColor(pixel))
+                            colors.Add(pixel);
+
+
+                    }
+                }
+            });
+            //return new Bitmap(location);
+            return colors;
+
+        }
+
+        private static int GetCount(long v)
+        {
+
+            if (v < 1000000)
+                return 1;
+            else if (v < 10000000)
+                return 3;
+            else if (v < 100000000)
+                return 10;
+            else if (v < 1000000000)
+                return 50;
+            else if (v < 10000000000)
+                return 500;
+            else if (v < 100000000000)
+                return 1000;
+            else if (v < 1000000000000)
+                return 1500;
+            else if (v < 10000000000000)
+                return 3000;
+            else if (v < 100000000000000)
+                return 5000;
+            else if (v < 1000000000000000)
+                return 10000;
+            else if (v < 10000000000000000)
+                return 20000;
+            else if (v < 100000000000000000)
+                return 40000;
+            else if (v < 1000000000000000000)
+                return 50000;
+            else
+                return 80000;
+        }
+        public static bool CompareColors(Color c1,Color c2)
+        {
+            var r = Math.Abs(c1.R - c2.R);
+            var g = Math.Abs(c1.G - c2.G);
+            var b= Math.Abs(c1.B - c2.B);
+            return r <= 20 && g <= 20 && b <= 20;
+
+        }
+        public static async Task<(Image img, Dictionary<Color, List<CustomPosition>> pos)> ProcessImage2(string location, bool markInBlack = true, int limit = 0, AdditionalColor additional = null)
         {
             ImageObj = new CustomImage();
 
             ImageObj.Image = new Bitmap(location);
             //Image img = System.Drawing.Image.FromFile(location);
             Positions = new Dictionary<Color, List<CustomPosition>>();
+            var w = ImageObj.Image.Size.Width;
+            var h = ImageObj.Image.Size.Height;
+            var count = GetCount((long)w * (long)h);
             AdditionalColor = additional?.colorCode ?? Color.Transparent;
+            int lc = 0;
             await Task.Run(async () =>
             {
-                for (int i = 0; i < ImageObj.Image.Width; i++)
+                for (int i = 0; i < ImageObj.Image.Width; i+=count)
                 {
                     for (int j = 0; j < ImageObj.Image.Height; j++)
                     {
+                        
                         var pixel = ImageObj.Image.GetPixel(i, j);
                         var color = ImageObj.GetColorName(pixel.R, pixel.G, pixel.B);
-                        if (additional != null && additional.colorCode == pixel)
+                        if (additional != null && CompareColors(additional.colorCode ,pixel))
                         {
                             if (Positions.ContainsKey(additional.colorCode))
                             {
@@ -106,13 +192,17 @@ namespace ColorsLib.Models
                                     continue;
                                 var pos = await GetCustomPos(i, j, additional.colorCode);
                                 Positions[additional.colorCode].Add(pos);
+                                lc++;
                             }
                             else
                             {
                                 var pos = await GetCustomPos(i, j, additional.colorCode);
                                 Positions.Add(additional.colorCode, new List<CustomPosition> { pos });
+                                lc++;
                             }
                         }
+                        if (lc >= limit)
+                            break;
                         if (color == Color.Transparent || additional !=null)
                             continue;
                         if (Positions.ContainsKey(color))
@@ -121,12 +211,16 @@ namespace ColorsLib.Models
                                 continue;
                             var pos = await GetCustomPos(i, j, color);
                             Positions[color].Add(pos);
+                            lc++;
                         }
                         else
                         {
                             var pos = await GetCustomPos(i, j, color);
                             Positions.Add(color, new List<CustomPosition> { pos });
+                            lc++;
                         }
+                        if (lc >= limit)
+                            break;
                     }
                 }
                 

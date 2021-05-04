@@ -95,26 +95,31 @@
 
                             <StackPanel  HorizontalAlignment="Center"  VerticalAlignment="Center" Orientation="Horizontal">
                                 <TextBlock Foreground="ForestGreen" Margin="5" FontSize="14" FontWeight="SemiBold" Text="Color to Detect"/>
-                                <TextBlock HorizontalAlignment="Center" Text="{Binding HomeModel.ColorCode,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                                <TextBlock Visibility="Collapsed" HorizontalAlignment="Center" Text="{Binding HomeModel.ColorCode,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
                                    FontSize="14" VerticalAlignment="Center" MinWidth="40" Margin="5" x:Name="colorTextBlock"/>
-                                <xctk:ColorPicker SelectedColor="{Binding HomeModel.SelectedColor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="colorPicker" Width="45"   >
+                                <!--<xctk:ColorPicker SelectedColor="{Binding HomeModel.SelectedColor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="colorPicker" Width="45"   >
                                     <i:Interaction.Triggers>
                                         <i:EventTrigger EventName="SelectedColorChanged">
                                             <i:InvokeCommandAction Command="{Binding Path=ColorChangedCmd}" CommandParameter="{Binding ElementName=colorPicker}"/>
                                         </i:EventTrigger>
                                     </i:Interaction.Triggers>
-                                </xctk:ColorPicker>
-                                <StackPanel Grid.Row="1"  Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock FontSize="14"  VerticalAlignment="Center" Margin="10 0">Color for Shape</TextBlock>
-                                    <xctk:ColorPicker  SelectedColor="{Binding HomeModel.ShapeColor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="shapeColorPicker" Width="45"   >
-                                        <i:Interaction.Triggers>
-                                            <i:EventTrigger EventName="SelectedColorChanged">
-                                                <i:InvokeCommandAction Command="{Binding Path=ShapeColorChangedCmd}" CommandParameter="{Binding ElementName=shapeColorPicker}"/>
-                                            </i:EventTrigger>
-                                        </i:Interaction.Triggers>
-                                    </xctk:ColorPicker>
-
+                                </xctk:ColorPicker>-->
+                                <ComboBox Margin="20 0" MinWidth="60" SelectedItem="{Binding HomeModel.SelectedColorName}" ItemsSource="{Binding HomeModel.PresentColors}">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate >
+                                            <StackPanel Orientation="Horizontal">
+                                                <Rectangle Width="20" Height="20" Fill="{Binding FillColor}" ></Rectangle>
+                                                <TextBlock Visibility="Collapsed" Margin="5 0 0 0" Text="{Binding ColorName}"></TextBlock>
+                                            </StackPanel>
+                                            
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <StackPanel VerticalAlignment="Center"  Orientation="Horizontal">
+                                    <TextBlock VerticalAlignment="Center" FontSize="14" Text="Limit"></TextBlock>
+                                    <TextBox MinWidth="50" Margin="10 0" Height="20" Text="{Binding HomeModel.Limit}"></TextBox>
                                 </StackPanel>
+                                
 
                                 
 
@@ -161,7 +166,17 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"  Orientation="Horizontal" Grid.ColumnSpan="2">
-                            
+                            <StackPanel Margin="0 0 20 0" Grid.Row="1"  Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock  FontSize="14"  VerticalAlignment="Center" Margin="10 0">Color for Shape</TextBlock>
+                                <xctk:ColorPicker  SelectedColor="{Binding HomeModel.ShapeColor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" x:Name="shapeColorPicker" Width="45"   >
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="SelectedColorChanged">
+                                            <i:InvokeCommandAction Command="{Binding Path=ShapeColorChangedCmd}" CommandParameter="{Binding ElementName=shapeColorPicker}"/>
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </xctk:ColorPicker>
+
+                            </StackPanel>
                             <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <TextBlock FontSize="14"  VerticalAlignment="Center" Text="Enter Color Name"/>
                                 <TextBox Height="25" VerticalContentAlignment="Center" Margin="20 0" MinWidth="100"
